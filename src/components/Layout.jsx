@@ -116,7 +116,7 @@ const Layout = ({ children }) => {
             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-4 px-4">Main Menu</p>
             <SidebarItem icon={LayoutDashboard} label="Dashboard" path="/" onClick={() => handleNavigation('/')} />
             <SidebarItem icon={Calendar} label="Events" path="/events" onClick={() => handleNavigation('/events')} />
-            <SidebarItem icon={BarChart3} label="Analytics" path="/activities" onClick={() => handleNavigation('/activities')} />
+            <SidebarItem icon={BarChart3} label="Activities" path="/activities" onClick={() => handleNavigation('/activities')} />
             <SidebarItem icon={CreditCard} label="Transactions" path="/transactions" onClick={() => handleNavigation('/transactions')} />
             
             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-8 mb-4 px-4">Features</p>
