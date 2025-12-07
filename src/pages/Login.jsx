@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
-
+import logo2 from '../assets/logo2.png';
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,7 @@ const Login = () => {
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-8">
-              <img src="/src/assets/logo2.png" alt="LifeKit Logo" className="w-10 h-10" />
+              <img src={logo2} alt="LifeKit Logo" className="w-10 h-10" />
               <span className="text-2xl font-bold tracking-tight">LifeKit</span>
             </div>
             <h1 className="text-5xl font-bold leading-tight mb-6">Manage your services with total control.</h1>

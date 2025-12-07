@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Calendar, BarChart3, CreditCard, MessageSquare, Settings, LogOut, Search, Bell, Moon, Menu, X as CloseIcon, PieChart } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../lib/axios';
+import logo from '../assets/logo.png';
 
 const SidebarItem = ({ icon: Icon, label, path, badge, onClick }) => {
   const location = useLocation();
@@ -100,7 +101,7 @@ const Layout = ({ children }) => {
         >
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-2">
-          <img src="/src/assets/logo.png" alt="LifeKit Logo" className="w-8 h-8" />
+          <img src={logo} alt="LifeKit Logo" className="w-8 h-8" />
           <span className="text-2xl font-bold tracking-tight text-[#89273B]">LifeKit</span>
             </div>
             <button 
