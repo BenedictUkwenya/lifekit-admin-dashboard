@@ -11,6 +11,7 @@ const Feeds = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
+    title: '',
     content: '',
     image: null,
     imagePreview: null
@@ -69,12 +70,13 @@ const Feeds = () => {
 
       // Create Post
       await api.post('/feeds/posts', {
+        title: formData.title || null,
         content: formData.content,
         image_url: finalImageUrl,
       });
 
       alert("Post Created!");
-      setFormData({ content: '', image: null, imagePreview: null });
+      setFormData({ title: '', content: '', image: null, imagePreview: null });
       fetchPosts();
 
     } catch (error) {
@@ -128,6 +130,18 @@ const Feeds = () => {
               )}
             </div>
 
+            {/* Title Input (optional) */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title (optional)</label>
+              <input
+                type="text"
+                className="w-full bg-[#F9F9F9] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]"
+                placeholder="Short headline for this post"
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+
             {/* Content Input */}
             <div className="flex-1 mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Post Content</label>
@@ -135,7 +149,7 @@ const Feeds = () => {
                 className="w-full h-full bg-[#F9F9F9] rounded-xl p-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B] resize-none"
                 placeholder="What's happening? Share updates, news, or tips..."
                 value={formData.content}
-                onChange={e => setFormData({...formData, content: e.target.value})}
+                onChange={e => setFormData({ ...formData, content: e.target.value })}
               />
             </div>
 
@@ -186,6 +200,12 @@ const Feeds = () => {
                       </button>
                     </div>
                     
+                    {post.title && (
+                      <p className="text-sm font-semibold text-gray-800 mb-1">
+                        {post.title}
+                      </p>
+                    )}
+
                     <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
                       {post.content}
                     </p>

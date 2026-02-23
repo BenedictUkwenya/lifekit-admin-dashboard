@@ -19,7 +19,17 @@ const Events = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    title: '', about: '', eventDate: '', eventTime: '', price: '', location: '', image: null, imagePreview: null
+    title: '',
+    about: '',
+    eventDate: '',
+    eventTime: '',
+    price: '',
+    location: '',
+    address: '',
+    category: 'Theatre',
+    isFeatured: false,
+    image: null,
+    imagePreview: null
   });
 
   // --- INITIAL LOAD ---
@@ -51,11 +61,10 @@ const Events = () => {
     if(!window.confirm("Are you sure you want to delete this event? This cannot be undone.")) return;
     
     try {
-      // FIX: Changed from '/admin/events/${id}' to '/events/${id}'
       await api.delete(`/events/${id}`);
       setSelectedEvent(null); 
       fetchEvents(); 
-    } catch (e) {
+    } catch {
       alert("Failed to delete event");
     }
   };
@@ -63,13 +72,12 @@ const Events = () => {
   const handleToggleStatus = async (event) => {
     const newStatus = !event.is_active; 
     try {
-      // FIX: Changed from '/admin/events/.../status' to '/events/.../status'
       await api.put(`/events/${event.id}/status`, { is_active: newStatus });
       
       const updatedEvent = { ...event, is_active: newStatus };
       setSelectedEvent(updatedEvent);
       fetchEvents(); 
-    } catch (e) {
+    } catch {
       alert("Failed to update status");
     }
   };
@@ -103,7 +111,6 @@ const Events = () => {
         finalImageUrl = uploadRes.data.url;
       }
 
-      // FIX: Changed from '/admin/events' to '/events'
       await api.post('/events', {
         title: formData.title,
         description: formData.about,
@@ -111,11 +118,26 @@ const Events = () => {
         event_date: formData.eventDate,
         event_time: formData.eventTime,
         price: parseFloat(formData.price),
-        location: formData.location
+        location: formData.location,
+        address: formData.address || null,
+        category: formData.category || null,
+        is_featured: formData.isFeatured
       });
 
       alert("Event Published!");
-      setFormData({ title: '', about: '', eventDate: '', eventTime: '', price: '', location: '', image: null, imagePreview: null });
+      setFormData({
+        title: '',
+        about: '',
+        eventDate: '',
+        eventTime: '',
+        price: '',
+        location: '',
+        address: '',
+        category: 'Theatre',
+        isFeatured: false,
+        image: null,
+        imagePreview: null
+      });
       fetchEvents();
 
     } catch (error) {
@@ -202,13 +224,77 @@ const Events = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                  <input type="number" className="w-full bg-[#F5F5F5] rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]" placeholder="12,500" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                  <input
+                    type="number"
+                    className="w-full bg-[#F5F5F5] rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]"
+                    placeholder="12,500"
+                    value={formData.price}
+                    onChange={e => setFormData({ ...formData, price: e.target.value })}
+                  />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <input type="text" className="w-full bg-[#F5F5F5] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]" placeholder="Emir Palace, Kano Nigeria" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} />
+                <input
+                  type="text"
+                  className="w-full bg-[#F5F5F5] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]"
+                  placeholder="Emir Palace, Kano Nigeria"
+                  value={formData.location}
+                  onChange={e => setFormData({ ...formData, location: e.target.value })}
+                />
               </div>
+            </div>
+
+            {/* Address (optional, used in EventDetailScreen) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address (optional)</label>
+              <input
+                type="text"
+                className="w-full bg-[#F5F5F5] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]"
+                placeholder="123 Kings Road, City, Country"
+                value={formData.address}
+                onChange={e => setFormData({ ...formData, address: e.target.value })}
+              />
+            </div>
+
+            {/* Category selector – must match Flutter categories */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                className="w-full bg-[#F5F5F5] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#89273B]"
+                value={formData.category}
+                onChange={e => setFormData({ ...formData, category: e.target.value })}
+              >
+                <option value="Theatre">Theatre</option>
+                <option value="Sport">Sport</option>
+                <option value="Festival">Festival</option>
+                <option value="Tourism">Tourism</option>
+                <option value="Music">Music</option>
+                <option value="Food">Food</option>
+              </select>
+            </div>
+
+            {/* Featured toggle – controls hero carousel in FeedsScreen */}
+            <div className="flex items-center justify-between bg-[#F5F5F5] rounded-xl px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Feature this event</p>
+                <p className="text-xs text-gray-400">
+                  Featured events appear in the mobile home carousel.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, isFeatured: !prev.isFeatured }))}
+                className={`w-11 h-6 flex items-center rounded-full transition-colors ${
+                  formData.isFeatured ? 'bg-[#89273B]' : 'bg-gray-300'
+                }`}
+              >
+                <div
+                  className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
+                    formData.isFeatured ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
           </div>
 
