@@ -10,6 +10,8 @@ import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics'; // This is the new "Deep Analysis" page
 import Settings from './pages/Settings';
 import Feeds from './pages/Feeds';
+import Requests from './pages/Requests';
+import UserMonitor from './pages/UserMonitor';
 
 // Protection Wrapper
 const PrivateRoute = ({ children }) => {
@@ -39,6 +41,8 @@ function App() {
         <Route path="/analysis" element={<PrivateRoute><Analytics /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/feeds" element={<PrivateRoute><Feeds /></PrivateRoute>} />
+        <Route path="/requests" element={<PrivateRoute><Requests /></PrivateRoute>} />
+        <Route path="/users" element={<PrivateRoute><UserMonitor /></PrivateRoute>} />
         
         {/* Fallback for unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />

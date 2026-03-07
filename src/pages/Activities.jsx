@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/Layout';
 import api from '../lib/axios';
 import { format } from 'date-fns';
@@ -12,18 +12,12 @@ const Activities = () => {
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
   const [pendingServices, setPendingServices] = useState([]); 
-  const [selectedReview, setSelectedReview] = useState(null); 
   const [services, setServices] = useState([]); 
   const [selectedService, setSelectedService] = useState(null); 
-  const [isLoading, setIsLoading] = useState(true);
   const [rejectReason, setRejectReason] = useState("");
 
   // --- FETCH DATA ---
-  useEffect(() => {
-    fetchData();
-  }, [chartPeriod]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [chartRes, queueRes] = await Promise.all([
         api.get(`/admin/activities/chart?period=${chartPeriod}`),
@@ -37,10 +31,15 @@ const Activities = () => {
 
     } catch (error) {
       console.error("Error fetching activities:", error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [chartPeriod]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [fetchData]);
 
   // --- HANDLERS ---
   const handleReviewAction = async (itemToReview, status) => {
@@ -49,10 +48,9 @@ const Activities = () => {
       await api.put(`/admin/review-service/${itemToReview.id}`, { status, reason: rejectReason });
       alert(`Service ${status}`);
       setRejectReason("");
-      setSelectedReview(null);
       setSelectedService(null);
       fetchData(); 
-    } catch (error) {
+    } catch {
       alert("Action failed");
     }
   };

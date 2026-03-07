@@ -79,7 +79,7 @@ const Feeds = () => {
       setFormData({ title: '', content: '', image: null, imagePreview: null });
       fetchPosts();
 
-    } catch (error) {
+    } catch {
       alert("Failed to create post");
     } finally {
       setIsSubmitting(false);
@@ -91,7 +91,7 @@ const Feeds = () => {
     try {
       await api.delete(`/feeds/posts/${id}`);
       fetchPosts();
-    } catch (e) { alert("Failed to delete"); }
+    } catch { alert("Failed to delete"); }
   };
 
   return (

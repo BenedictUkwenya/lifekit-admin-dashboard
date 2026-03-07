@@ -6,7 +6,6 @@ import api from '../lib/axios';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   // Data States
@@ -34,7 +33,6 @@ const Settings = () => {
   }, []);
 
   const fetchInitialData = async () => {
-    setLoading(true);
     try {
       // 1. Get User from LocalStorage
       const userStr = localStorage.getItem('admin_user');
@@ -73,8 +71,6 @@ const Settings = () => {
 
     } catch (error) {
       console.error("Error loading settings:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -170,7 +166,7 @@ const Settings = () => {
     try {
       await api.delete(`/admin/users/admins/${id}`);
       setAdmins(admins.filter(a => a.id !== id));
-    } catch (e) { alert("Failed to remove admin"); }
+    } catch { alert("Failed to remove admin"); }
   };
 
   // --- CATEGORY ACTIONS ---
@@ -201,7 +197,7 @@ const Settings = () => {
     try {
       await api.delete(`/admin/categories/${id}`);
       setCategories(categories.filter(c => c.id !== id));
-    } catch (e) { alert("Failed to delete"); }
+    } catch { alert("Failed to delete"); }
   };
 
   const displayedCategories = selectedParent 
@@ -216,7 +212,7 @@ const Settings = () => {
         activeTab === id ? 'bg-[#EAEAEA] text-gray-900' : 'text-gray-500 hover:bg-gray-50'
       }`}
     >
-      <Icon size={18} />
+      {Icon({ size: 18 })}
       {label}
     </button>
   );

@@ -8,7 +8,7 @@ const StatCard = ({ icon: Icon, label, value, colorClass }) => (
   <div className={`p-4 sm:p-6 rounded-2xl ${colorClass}`}>
     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
       <div className="p-2 bg-white/30 rounded-lg backdrop-blur-sm">
-        <Icon size={20} className="sm:size-6 text-gray-800" />
+        {Icon({ size: 20, className: "sm:size-6 text-gray-800" })}
       </div>
       <span className="font-medium text-xs sm:text-sm text-gray-700 line-clamp-2">{label}</span>
     </div>
