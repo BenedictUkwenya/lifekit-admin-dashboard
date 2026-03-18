@@ -4,20 +4,23 @@ import { DollarSign, ShoppingBag, Users, Activity, X, Search, Filter } from 'luc
 import api from '../lib/axios';
 import { format } from 'date-fns';
 
-const StatCard = ({ icon: Icon, label, value, colorClass }) => (
-  <div className={`p-4 sm:p-6 rounded-2xl ${colorClass}`}>
-    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-      <div className="p-2 bg-white/30 rounded-lg backdrop-blur-sm">
-        {Icon({ size: 20, className: "sm:size-6 text-gray-800" })}
+const StatCard = ({ icon: Icon, label, value, colorClass }) => {
+  const IconComponent = Icon;
+  return (
+    <div className={`p-4 sm:p-6 rounded-2xl ${colorClass}`}>
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+        <div className="p-2 bg-white/30 rounded-lg backdrop-blur-sm">
+          {IconComponent ? <IconComponent size={20} className="sm:size-6 text-gray-800" /> : null}
+        </div>
+        <span className="font-medium text-xs sm:text-sm text-gray-700 line-clamp-2">{label}</span>
       </div>
-      <span className="font-medium text-xs sm:text-sm text-gray-700 line-clamp-2">{label}</span>
+      <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{value}</h3>
+      <p className="text-xs text-gray-600 bg-white/40 inline-block px-2 py-1 rounded-md">
+        Live Data
+      </p>
     </div>
-    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{value}</h3>
-    <p className="text-xs text-gray-600 bg-white/40 inline-block px-2 py-1 rounded-md">
-      Live Data
-    </p>
-  </div>
-);
+  );
+};
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);

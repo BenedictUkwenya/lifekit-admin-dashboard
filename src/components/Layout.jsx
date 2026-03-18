@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Calendar, BarChart3, CreditCard, MessageSquare, Settings, LogOut, Search, Bell, Moon, Menu, X as CloseIcon, PieChart, ClipboardList, Users } from 'lucide-react';
+import { LayoutDashboard, Calendar, BarChart3, CreditCard, MessageSquare, Settings, LogOut, Search, Bell, Moon, Menu, X as CloseIcon, PieChart, ClipboardList, Users, LifeBuoy, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../lib/axios';
 import logo from '../assets/logo.png';
@@ -7,6 +7,7 @@ import logo from '../assets/logo.png';
 const SidebarItem = ({ icon: Icon, label, path, badge, onClick }) => {
   const location = useLocation();
   const isActive = location.pathname === path || (path === '/' && location.pathname === '/dashboard');
+  const IconComponent = Icon;
 
   return (
     <div 
@@ -18,7 +19,7 @@ const SidebarItem = ({ icon: Icon, label, path, badge, onClick }) => {
       }`}
     >
       <div className="flex items-center gap-3">
-        {Icon({ size: 20, className: isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600" })}
+        {IconComponent ? <IconComponent size={20} className={isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"} /> : null}
         <span className="font-medium text-sm">{label}</span>
       </div>
       {badge && (
@@ -122,7 +123,9 @@ const Layout = ({ children }) => {
             <SidebarItem icon={PieChart} label="Deep Analysis" path="/analysis" onClick={() => handleNavigation('/analysis')} />
             <SidebarItem icon={MessageSquare} label="Feedback" path="/feedback" onClick={() => handleNavigation('/feedback')} />
             <SidebarItem icon={ClipboardList} label="Requests" path="/requests" onClick={() => handleNavigation('/requests')} />
-            <SidebarItem icon={Users} label="Users" path="/users" onClick={() => handleNavigation('/users')} />
+            <SidebarItem icon={Users} label="User Monitor" path="/users" onClick={() => handleNavigation('/users')} />
+            <SidebarItem icon={AlertTriangle} label="Disputes" path="/disputes" onClick={() => handleNavigation('/disputes')} />
+            <SidebarItem icon={LifeBuoy} label="Support" path="/support" onClick={() => handleNavigation('/support')} />
           </div>
 
           <div className="space-y-1 mt-auto pt-4 border-t border-gray-50">

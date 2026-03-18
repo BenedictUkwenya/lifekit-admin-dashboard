@@ -1,13 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Layout from '../components/Layout';
 import api from '../lib/axios';
 import { Users, Ban, PauseCircle, AlertTriangle, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const UserMonitor = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [warnUser, setWarnUser] = useState(null);
   const [warningMessage, setWarningMessage] = useState('');
+  const location = useLocation();
+  const focusedUserId = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('focus');
+  }, [location.search]);
 
   const fetchUsers = async () => {
     try {
@@ -23,6 +29,14 @@ const UserMonitor = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (!focusedUserId) return;
+    const row = document.getElementById(`user-row-${focusedUserId}`);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [focusedUserId, users]);
 
   const handleStatusUpdate = async (userId, status) => {
     const confirmed = window.confirm(`Set user status to ${status}?`);
@@ -104,7 +118,13 @@ const UserMonitor = () => {
                 </thead>
                 <tbody className="text-xs sm:text-sm">
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={user.id}
+                      id={`user-row-${user.id}`}
+                      className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${
+                        focusedUserId === user.id ? 'bg-[#FDF0F3]' : ''
+                      }`}
+                    >
                       <td className="py-3 lg:py-4 pl-2 sm:pl-4 font-medium text-gray-900">
                         {user.full_name || 'Unknown'}
                       </td>

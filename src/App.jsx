@@ -12,6 +12,8 @@ import Settings from './pages/Settings';
 import Feeds from './pages/Feeds';
 import Requests from './pages/Requests';
 import UserMonitor from './pages/UserMonitor';
+import Support from './pages/Support';
+import Disputes from './pages/Disputes';
 
 // Protection Wrapper
 const PrivateRoute = ({ children }) => {
@@ -43,6 +45,8 @@ function App() {
         <Route path="/feeds" element={<PrivateRoute><Feeds /></PrivateRoute>} />
         <Route path="/requests" element={<PrivateRoute><Requests /></PrivateRoute>} />
         <Route path="/users" element={<PrivateRoute><UserMonitor /></PrivateRoute>} />
+        <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
+        <Route path="/disputes" element={<PrivateRoute><Disputes /></PrivateRoute>} />
         
         {/* Fallback for unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
