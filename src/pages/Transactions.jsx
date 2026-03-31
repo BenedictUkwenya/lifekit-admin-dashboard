@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../lib/axios';
 import { format, isFuture, isPast } from 'date-fns';
-import { Search, MapPin, Clock, CheckCircle, Hourglass, Calendar } from 'lucide-react';
+import { Search, Clock, CheckCircle, Calendar, AlertTriangle } from 'lucide-react';
 
 const Transactions = () => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [overdueJobs, setOverdueJobs] = useState(0);
+  const [nudgeLoadingById, setNudgeLoadingById] = useState({});
   
   // Filters
   const [statusFilter, setStatusFilter] = useState('All'); // 'All', 'Completed', 'Upcoming'
@@ -47,12 +49,32 @@ const Transactions = () => {
   const fetchBookings = async () => {
     try {
       const res = await api.get('/admin/bookings/all');
-      setBookings(res.data);
-      setFilteredBookings(res.data);
+      const payload = Array.isArray(res.data)
+        ? { bookings: res.data, stats: {} }
+        : (res.data || {});
+      const bookingRows = payload.bookings || [];
+      const computedOverdueJobs = bookingRows.filter(isBookingOverdue).length;
+
+      setBookings(bookingRows);
+      setFilteredBookings(bookingRows);
+      setOverdueJobs(payload.stats?.overdue_jobs ?? computedOverdueJobs);
     } catch (error) {
       console.error("Failed to load bookings", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNudge = async (bookingId) => {
+    setNudgeLoadingById((prev) => ({ ...prev, [bookingId]: true }));
+    try {
+      await api.post(`/admin/bookings/${bookingId}/nudge`);
+      window.alert('High-priority nudge sent to client and provider.');
+    } catch (error) {
+      const message = error.response?.data?.error || error.message || 'Failed to send nudge.';
+      window.alert(message);
+    } finally {
+      setNudgeLoadingById((prev) => ({ ...prev, [bookingId]: false }));
     }
   };
 
@@ -62,6 +84,20 @@ const Transactions = () => {
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 lg:mb-6">Track Bookings</h1>
 
         {/* --- HEADER: FILTERS & SEARCH --- */}
+        <div className="mb-4 lg:mb-6">
+          <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-4 lg:p-5 max-w-xs">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">Overdue Jobs</p>
+                <p className="text-2xl lg:text-3xl font-bold text-red-600 mt-1">{overdueJobs}</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                <AlertTriangle className="text-red-500" size={20} />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 lg:gap-4">
           
           {/* Tabs */}
@@ -109,7 +145,12 @@ const Transactions = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {filteredBookings.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} />
+            <BookingCard
+              key={booking.id}
+              booking={booking}
+              onNudge={handleNudge}
+              isNudging={!!nudgeLoadingById[booking.id]}
+            />
           ))}
         </div>
       )}
@@ -118,7 +159,7 @@ const Transactions = () => {
 };
 
 // --- INDIVIDUAL CARD COMPONENT ---
-const BookingCard = ({ booking }) => {
+const BookingCard = ({ booking, onNudge, isNudging }) => {
   const [expanded, setExpanded] = useState(true);
 
   // 1. Extract Data
@@ -126,6 +167,7 @@ const BookingCard = ({ booking }) => {
   const service = booking.services;
   const date = new Date(booking.scheduled_time || booking.created_at);
   const isDatePast = isPast(date); // Check if date is in the past
+  const isOverdue = isBookingOverdue(booking);
   
   // 2. Logic: Status Badge
   // Default State
@@ -140,8 +182,7 @@ const BookingCard = ({ booking }) => {
   // LOGIC FIX HERE:
   else if (isDatePast) {
     if (booking.status === 'confirmed') {
-      // Confirmed + Past = Ongoing (Work in progress)
-      statusBadge = { label: 'Ongoing', bg: 'bg-yellow-50', text: 'text-yellow-600' };
+      statusBadge = { label: 'Overdue', bg: 'bg-red-50', text: 'text-red-600' };
     } else if (booking.status === 'pending') {
       // Pending + Past = Expired (Provider didn't accept in time)
       statusBadge = { label: 'Expired', bg: 'bg-gray-100', text: 'text-gray-500' };
@@ -154,7 +195,7 @@ const BookingCard = ({ booking }) => {
   const calculatedHours = Math.max(1, Math.round(booking.total_price / hourlyRate));
 
   return (
-    <div className="bg-white rounded-xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm border border-gray-100 flex flex-col transition-transform hover:scale-[1.01]">
+    <div className={`bg-white rounded-xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm border flex flex-col transition-transform hover:scale-[1.01] ${isOverdue ? 'border-red-200 bg-red-50/30' : 'border-gray-100'}`}>
       
       {/* Header: Provider Info & Status */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3 lg:mb-4">
@@ -195,8 +236,17 @@ const BookingCard = ({ booking }) => {
               </tr>
             </thead>
             <tbody className="text-gray-700 font-medium">
-              <tr>
-                <td className="py-2 truncate">{service?.title || 'General Service'}</td>
+              <tr className={isOverdue ? 'bg-red-50' : ''}>
+                <td className="py-2 truncate">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate">{service?.title || 'General Service'}</span>
+                    {isOverdue && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
+                        Overdue
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="py-2 text-center">{calculatedHours}</td>
                 <td className="py-2 text-right whitespace-nowrap">{format(date, 'h:mm a')}</td>
               </tr>
@@ -223,10 +273,27 @@ const BookingCard = ({ booking }) => {
             Track
           </button>
         </div>
+        {isOverdue && (
+          <button
+            onClick={() => onNudge?.(booking.id)}
+            disabled={isNudging}
+            className="mt-3 w-full py-2 lg:py-3 rounded-lg lg:rounded-xl bg-red-600 text-white font-semibold text-xs lg:text-sm hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isNudging ? 'Sending Nudge...' : 'Nudge'}
+          </button>
+        )}
       </div>
 
     </div>
   );
+};
+
+const isBookingOverdue = (booking) => {
+  if (booking?.is_overdue === true) return true;
+  if (booking?.status !== 'confirmed') return false;
+  const schedule = booking?.scheduled_time || booking?.created_at;
+  if (!schedule) return false;
+  return isPast(new Date(schedule));
 };
 
 export default Transactions;
