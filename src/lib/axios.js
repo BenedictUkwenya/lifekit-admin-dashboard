@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Change this URL to your running backend URL
-const BASE_URL = 'http://localhost:3000'; 
-//const BASE_URL =  'https://lifekitbackend.vercel.app'
+//const BASE_URL = 'http://localhost:3000'; 
+const BASE_URL =  'https://lifekitbackend.vercel.app'
 //const BASE_URL = 'https://lifekit-api.onrender.com';
 const api = axios.create({
   baseURL: BASE_URL,
