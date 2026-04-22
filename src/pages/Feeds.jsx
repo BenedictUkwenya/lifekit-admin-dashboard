@@ -192,7 +192,9 @@ const Feeds = () => {
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-sm text-gray-800">Admin</span>
+                        <span className="font-bold text-sm text-gray-800">
+                          {post.profiles?.full_name || 'Admin'}
+                        </span>
                         <span className="text-xs text-gray-400">• {format(new Date(post.created_at), 'MMM d, h:mm a')}</span>
                       </div>
                       <button onClick={() => handleDelete(post.id)} className="text-gray-300 hover:text-red-500">

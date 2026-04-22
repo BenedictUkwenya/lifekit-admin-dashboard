@@ -10,6 +10,7 @@ import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics'; // This is the new "Deep Analysis" page
 import Settings from './pages/Settings';
 import Feeds from './pages/Feeds';
+import Groups from './pages/Groups';
 import Requests from './pages/Requests';
 import UserMonitor from './pages/UserMonitor';
 import Support from './pages/Support';
@@ -43,6 +44,7 @@ function App() {
         <Route path="/analysis" element={<PrivateRoute><Analytics /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/feeds" element={<PrivateRoute><Feeds /></PrivateRoute>} />
+        <Route path="/groups" element={<PrivateRoute><Groups /></PrivateRoute>} />
         <Route path="/requests" element={<PrivateRoute><Requests /></PrivateRoute>} />
         <Route path="/users" element={<PrivateRoute><UserMonitor /></PrivateRoute>} />
         <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />

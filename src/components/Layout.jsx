@@ -132,6 +132,7 @@ const Layout = ({ children }) => {
             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-4 px-4">Account</p>
             <SidebarItem icon={Settings} label="Settings" path="/settings" onClick={() => handleNavigation('/settings')} />
             <SidebarItem icon={MessageSquare} label="Feeds" path="/feeds" onClick={() => handleNavigation('/feeds')} />
+            <SidebarItem icon={Users} label="Communities" path="/groups" onClick={() => handleNavigation('/groups')} />
             <SidebarItem icon={LogOut} label="Logout" onClick={handleLogout} />
           </div>
         </aside>
