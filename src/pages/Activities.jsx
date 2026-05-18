@@ -11,7 +11,7 @@ const Activities = () => {
   // --- STATE ---
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
-  const [pendingServices, setPendingServices] = useState([]); 
+  const [recentServices, setRecentServices] = useState([]); 
   const [services, setServices] = useState([]); 
   const [selectedService, setSelectedService] = useState(null); 
   const [rejectReason, setRejectReason] = useState("");
@@ -25,9 +25,10 @@ const Activities = () => {
       ]);
 
       setChartData(chartRes.data || []);
-      setServices(queueRes.data); 
-      const pending = queueRes.data.filter(s => s.status === 'pending');
-      setPendingServices(pending);
+      setServices(queueRes.data);
+      // Show the 5 most recently added services in the highlight card
+      const recent = (queueRes.data || []).slice(0, 5);
+      setRecentServices(recent);
 
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -128,20 +129,19 @@ const Activities = () => {
             </div>
           </div>
 
-          {/* 2. TOP RIGHT REVIEW CARD */}
-          {/* Responsive: Full width on mobile, flex-1 on lg+ */}
+          {/* 2. TOP RIGHT — RECENT SERVICES CARD */}
           <div className="flex-1 w-full bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-8 shadow-sm border border-gray-100 flex flex-col relative min-h-[350px] lg:min-h-[500px]">
-            {pendingServices.length > 0 ? (
+            {recentServices.length > 0 ? (
               <>
                 <div className="flex items-start justify-between mb-6">
                   <div className="min-w-0">
-                    <p className="text-sm text-gray-500 mb-1">{pendingServices[0].profiles?.full_name}</p>
-                    <h2 className="text-2xl font-bold text-gray-900 line-clamp-1">{pendingServices[0].title}</h2>
-                    <p className="text-sm text-gray-400 mt-1">+ Sub Services</p>
+                    <p className="text-sm text-gray-500 mb-1">{recentServices[0].profiles?.full_name}</p>
+                    <h2 className="text-2xl font-bold text-gray-900 line-clamp-1">{recentServices[0].title}</h2>
+                    <p className="text-sm text-green-500 font-medium mt-1">✓ Auto-approved</p>
                   </div>
-                  {pendingServices[0].profiles?.profile_picture_url ? (
-                    <img 
-                      src={pendingServices[0].profiles.profile_picture_url} 
+                  {recentServices[0].profiles?.profile_picture_url ? (
+                    <img
+                      src={recentServices[0].profiles.profile_picture_url}
                       className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md shrink-0 ml-4"
                       alt="Provider"
                     />
@@ -151,29 +151,29 @@ const Activities = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                  <button 
-                    onClick={() => setSelectedService(pendingServices[0])}
+                  <button
+                    onClick={() => setSelectedService(recentServices[0])}
                     className="flex-1 bg-[#FDF0F3] text-[#89273B] py-3 rounded-xl font-semibold hover:bg-pink-100 transition-colors"
                   >
                     Inspect
                   </button>
-                  <button 
-                    onClick={() => handleReviewAction(pendingServices[0], 'active')}
-                    className="flex-1 bg-[#89273B] text-white py-3 rounded-xl font-semibold hover:bg-[#722030] transition-colors shadow-lg shadow-red-900/20"
+                  <button
+                    onClick={() => handleReviewAction(recentServices[0], 'rejected')}
+                    className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
                   >
-                    Approve
+                    Remove
                   </button>
                 </div>
 
                 <div className="mt-auto pt-6 border-t border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm font-semibold text-gray-600">Others <span className="font-normal text-gray-400">| Total {pendingServices.length} Pending</span></p>
+                    <p className="text-sm font-semibold text-gray-600">Recent <span className="font-normal text-gray-400">| Total {services.length} Services</span></p>
                     <button className="text-gray-400"><MoreVertical size={16}/></button>
                   </div>
-                  
+
                   <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                    {pendingServices.map((service) => (
-                      <div 
+                    {recentServices.map((service) => (
+                      <div
                         key={service.id}
                         onClick={() => setSelectedService(service)}
                         className="min-w-[200px] p-4 rounded-2xl border border-gray-100 bg-white cursor-pointer hover:border-[#89273B] transition-colors"
@@ -185,7 +185,9 @@ const Activities = () => {
                           <p className="text-xs font-semibold truncate">{service.profiles?.full_name}</p>
                         </div>
                         <p className="font-bold text-sm text-gray-800 truncate mb-1">{service.title}</p>
-                        <p className="text-xs text-yellow-600 font-medium">Pending</p>
+                        <span className={`text-xs font-medium ${service.status === 'active' ? 'text-green-600' : 'text-gray-400'}`}>
+                          {service.status}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -194,8 +196,8 @@ const Activities = () => {
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
                 <CheckCircle size={48} className="text-green-500 mb-4" />
-                <h3 className="text-xl font-bold text-gray-800">All Caught Up!</h3>
-                <p className="text-gray-500">No pending services to review.</p>
+                <h3 className="text-xl font-bold text-gray-800">No Services Yet</h3>
+                <p className="text-gray-500">Services will appear here once providers create them.</p>
               </div>
             )}
           </div>
@@ -204,7 +206,7 @@ const Activities = () => {
         {/* === BOTTOM SECTION: TABLE === */}
         <div className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-8 shadow-sm border border-gray-100 w-full">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 lg:mb-8 gap-3 lg:gap-4">
-            <h3 className="text-lg lg:text-xl font-bold text-gray-800">Recent Services Request</h3>
+                <h3 className="text-lg lg:text-xl font-bold text-gray-800">All Services</h3>
             <div className="flex gap-2 lg:gap-4 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -292,8 +294,10 @@ const Activities = () => {
               </div>
 
               <div className="pt-4 sm:pt-6 border-t border-gray-100 flex gap-3 flex-col sm:flex-row">
-                <button onClick={() => handleReviewAction(selectedService, 'rejected')} className="flex-1 py-2 sm:py-3 border border-red-200 text-red-600 rounded-lg lg:rounded-xl font-medium text-xs sm:text-sm hover:bg-red-50 transition-colors">Reject</button>
-                <button onClick={() => handleReviewAction(selectedService, 'active')} className="flex-1 py-2 sm:py-3 bg-[#89273B] text-white rounded-lg lg:rounded-xl font-medium text-xs sm:text-sm hover:bg-[#722030] transition-colors shadow-lg shadow-red-900/20">Approve</button>
+                {selectedService?.status !== 'active' && (
+                  <button onClick={() => handleReviewAction(selectedService, 'active')} className="flex-1 py-2 sm:py-3 bg-green-600 text-white rounded-lg lg:rounded-xl font-medium text-xs sm:text-sm hover:bg-green-700 transition-colors">Restore (Set Active)</button>
+                )}
+                <button onClick={() => handleReviewAction(selectedService, 'rejected')} className="flex-1 py-2 sm:py-3 bg-red-600 text-white rounded-lg lg:rounded-xl font-medium text-xs sm:text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20">Remove Service</button>
               </div>
             </div>
           )}
